@@ -22,7 +22,7 @@
   {
     "id": "book02",
     "title": "안경너머의 폭풍",
-    "author": "김선우",
+    "author": "김시완",
     "pages": [
       "books/book02/001.jpg",
       "books/book02/002.jpg",
@@ -75,8 +75,8 @@
   },
   {
     "id": "book04",
-    "title": "노을 건너는 숲-이현율",
-    "author": "",
+    "title": "노을 건너는 숲",
+    "author": "이현율",
     "pages": [
       "books/books04/001.jpg",
       "books/books04/002.jpg",
