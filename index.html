@@ -19,7 +19,7 @@ async function setupAudio(book){
   const panel=$('audioPanel'),a=$('bookAudio'),source=$('audioSource');
   panel.style.display='none';
   $('audioError').style.display='none';
-  source.removeAttribute('src');a.load();
+  a.pause();source.removeAttribute('src');a.removeAttribute('src');
   const path=book.id+'.mp3';
   try{
     const response=await fetch(path,{method:'HEAD',cache:'no-store'});
@@ -32,7 +32,19 @@ async function setupAudio(book){
     source.src=path;a.load();panel.style.display='flex';
   }
 }
-$('bookAudio').addEventListener('error',()=>{$('audioError').style.display='block';},true);
+// 오디오 소스를 바꾸는 중 발생하는 일시적인 오류는 표시하지 않습니다.
+const bookAudioElement=$('bookAudio');
+const audioErrorElement=$('audioError');
+function clearAudioError(){audioErrorElement.style.display='none';}
+['loadedmetadata','loadeddata','canplay','playing'].forEach(eventName=>{
+  bookAudioElement.addEventListener(eventName,clearAudioError);
+});
+bookAudioElement.addEventListener('error',()=>{
+  // 실제로 오디오 파일을 재생할 수 없는 경우에만 오류를 표시합니다.
+  if(bookAudioElement.error && bookAudioElement.readyState===0 && bookAudioElement.currentSrc){
+    audioErrorElement.style.display='block';
+  }
+});
 function openBook(id){stopAudio();current=books.find(b=>b.id===id);if(!current)return;page=0;$('viewer').style.display='flex';document.body.style.overflow='hidden';$('bookTitle').textContent=current.title;setupAudio(current);history.replaceState(null,'','?book='+encodeURIComponent(id));render()}
 function closeBook(){audioRequestNumber++;stopAudio();current=null;$('viewer').style.display='none';document.body.style.overflow='';history.replaceState(null,'',location.pathname)}function double(){return innerWidth>700}function render(){if(!current)return;let count=double()&&page>0?Math.min(2,current.pages.length-page):1;let images=current.pages.slice(page,page+count);$('spread').className='spread turn'+(count===2?' double':'');$('spread').innerHTML='';images.forEach((src,i)=>{let im=document.createElement('img');im.src=src;im.alt=current.title+' '+(page+i+1)+'쪽';im.draggable=false;$('spread').appendChild(im)});$('counter').textContent=(page+1)+(count===2?'–'+(page+2):'')+' / '+current.count;$('prev').disabled=page===0;$('next').disabled=page+count>=current.count}function step(dir){if(!current)return;if(dir<0)page=Math.max(0,page-(double()&&page>1?2:1));else page=Math.min(current.count-1,page+(double()&&page>0?2:1));render()}function shareBook(){let u=location.href;if(navigator.clipboard?.writeText){navigator.clipboard.writeText(u).then(()=>alert('책 링크를 복사했어요!')).catch(()=>prompt('책 링크를 복사하세요',u))}else prompt('책 링크를 복사하세요',u)}addEventListener('resize',()=>{if(current)render()});addEventListener('keydown',e=>{if(!current)return;if(e.key==='Escape')closeBook();if(e.key==='ArrowRight')step(1);if(e.key==='ArrowLeft')step(-1)});let touchX=null;$('stage').addEventListener('touchstart',e=>touchX=e.touches[0].clientX,{passive:true});$('stage').addEventListener('touchend',e=>{if(touchX===null)return;let dx=e.changedTouches[0].clientX-touchX;if(Math.abs(dx)>55)step(dx<0?1:-1);touchX=null},{passive:true});
 </script></body></html>
