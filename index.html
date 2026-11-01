@@ -14,6 +14,13 @@ Promise.resolve([{"id":"book01","title":"멜빵끈이 이뤄낸 하루","author"
 // MP3 파일명은 책 ID에 따라 자동으로 정해집니다. 예: book04 → book04.mp3
 let audioRequestNumber=0;
 
+function stopAudio() {
+  const audio = document.getElementById('bookAudio');
+  if (!audio) return;
+  audio.pause();
+  audio.currentTime = 0;
+}
+
 function setupAudio(book) {
   const request = ++audioRequestNumber;
   const panel = $('audioPanel');
